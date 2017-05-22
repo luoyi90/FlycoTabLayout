@@ -11,9 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
 
-import com.flyco.roundview.RoundTextView;
 import com.flyco.tablayout.SlidingTabLayout;
 import com.flyco.tablayout.listener.OnTabSelectListener;
+import com.flyco.tablayout.widget.MsgView;
 import com.flyco.tablayoutsamples.R;
 import com.flyco.tablayoutsamples.utils.ViewFindUtils;
 
@@ -23,9 +23,10 @@ public class SlidingTabActivity extends AppCompatActivity implements OnTabSelect
     private Context mContext = this;
     private ArrayList<Fragment> mFragments = new ArrayList<>();
     private final String[] mTitles = {
-            "热门", "iOS", "Android", "前端"
-            , "后端", "设计", "工具资源"
+            "热门", "iOS", "Android"
+            , "前端", "后端", "设计", "工具资源"
     };
+    private MyPagerAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,9 +37,11 @@ public class SlidingTabActivity extends AppCompatActivity implements OnTabSelect
             mFragments.add(SimpleCardFragment.getInstance(title));
         }
 
+
         View decorView = getWindow().getDecorView();
         ViewPager vp = ViewFindUtils.find(decorView, R.id.vp);
-        vp.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
+        mAdapter = new MyPagerAdapter(getSupportFragmentManager());
+        vp.setAdapter(mAdapter);
 
         /** 默认 */
         SlidingTabLayout tabLayout_1 = ViewFindUtils.find(decorView, R.id.tl_1);
@@ -53,7 +56,7 @@ public class SlidingTabActivity extends AppCompatActivity implements OnTabSelect
         /** indicator圆 */
         SlidingTabLayout tabLayout_6 = ViewFindUtils.find(decorView, R.id.tl_6);
         /** indicator矩形圆角 */
-        SlidingTabLayout tabLayout_7 = ViewFindUtils.find(decorView, R.id.tl_7);
+        final SlidingTabLayout tabLayout_7 = ViewFindUtils.find(decorView, R.id.tl_7);
         /** indicator三角形 */
         SlidingTabLayout tabLayout_8 = ViewFindUtils.find(decorView, R.id.tl_8);
         /** indicator圆角色块 */
@@ -81,13 +84,27 @@ public class SlidingTabActivity extends AppCompatActivity implements OnTabSelect
 
         tabLayout_2.showMsg(3, 5);
         tabLayout_2.setMsgMargin(3, 0, 10);
-        RoundTextView rtv_2_3 = tabLayout_2.getMsgView(3);
+        MsgView rtv_2_3 = tabLayout_2.getMsgView(3);
         if (rtv_2_3 != null) {
-            rtv_2_3.getDelegate().setBackgroundColor(Color.parseColor("#6D8FB0"));
+            rtv_2_3.setBackgroundColor(Color.parseColor("#6D8FB0"));
         }
 
         tabLayout_2.showMsg(5, 5);
         tabLayout_2.setMsgMargin(5, 0, 10);
+
+//        tabLayout_7.setOnTabSelectListener(new OnTabSelectListener() {
+//            @Override
+//            public void onTabSelect(int position) {
+//                Toast.makeText(mContext, "onTabSelect&position--->" + position, Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onTabReselect(int position) {
+//                mFragments.add(SimpleCardFragment.getInstance("后端"));
+//                mAdapter.notifyDataSetChanged();
+//                tabLayout_7.addNewTab("后端");
+//            }
+//        });
     }
 
     @Override

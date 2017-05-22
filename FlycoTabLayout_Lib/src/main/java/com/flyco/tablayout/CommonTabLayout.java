@@ -1,5 +1,7 @@
 package com.flyco.tablayout;
 
+import android.animation.TypeEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -24,13 +26,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.flyco.roundview.RoundTextView;
 import com.flyco.tablayout.listener.CustomTabEntity;
 import com.flyco.tablayout.listener.OnTabSelectListener;
 import com.flyco.tablayout.utils.FragmentChangeManager;
 import com.flyco.tablayout.utils.UnreadMsgUtils;
-import com.nineoldandroids.animation.TypeEvaluator;
-import com.nineoldandroids.animation.ValueAnimator;
+import com.flyco.tablayout.widget.MsgView;
 
 import java.util.ArrayList;
 
@@ -84,10 +84,13 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
     private float mDividerPadding;
 
     /** title */
+    private static final int TEXT_BOLD_NONE = 0;
+    private static final int TEXT_BOLD_WHEN_SELECT = 1;
+    private static final int TEXT_BOLD_BOTH = 2;
     private float mTextsize;
     private int mTextSelectColor;
     private int mTextUnselectColor;
-    private boolean mTextBold;
+    private int mTextBold;
     private boolean mTextAllCaps;
 
     /** icon */
@@ -171,7 +174,7 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         mTextsize = ta.getDimension(R.styleable.CommonTabLayout_tl_textsize, sp2px(13f));
         mTextSelectColor = ta.getColor(R.styleable.CommonTabLayout_tl_textSelectColor, Color.parseColor("#ffffff"));
         mTextUnselectColor = ta.getColor(R.styleable.CommonTabLayout_tl_textUnselectColor, Color.parseColor("#AAffffff"));
-        mTextBold = ta.getBoolean(R.styleable.CommonTabLayout_tl_textBold, false);
+        mTextBold = ta.getInt(R.styleable.CommonTabLayout_tl_textBold, TEXT_BOLD_NONE);
         mTextAllCaps = ta.getBoolean(R.styleable.CommonTabLayout_tl_textAllCaps, false);
 
         mIconVisible = ta.getBoolean(R.styleable.CommonTabLayout_tl_iconVisible, true);
@@ -273,8 +276,10 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
                 tv_tab_title.setText(tv_tab_title.getText().toString().toUpperCase());
             }
 
-            if (mTextBold) {
-                tv_tab_title.getPaint().setFakeBoldText(mTextBold);
+            if (mTextBold == TEXT_BOLD_BOTH) {
+                tv_tab_title.getPaint().setFakeBoldText(true);
+            } else if (mTextBold == TEXT_BOLD_NONE) {
+                tv_tab_title.getPaint().setFakeBoldText(false);
             }
 
             ImageView iv_tab_icon = (ImageView) tabView.findViewById(R.id.iv_tab_icon);
@@ -311,6 +316,9 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
             ImageView iv_tab_icon = (ImageView) tabView.findViewById(R.id.iv_tab_icon);
             CustomTabEntity tabEntity = mTabEntitys.get(i);
             iv_tab_icon.setImageResource(isSelect ? tabEntity.getTabSelectedIcon() : tabEntity.getTabUnselectedIcon());
+            if (mTextBold == TEXT_BOLD_WHEN_SELECT) {
+                tab_title.getPaint().setFakeBoldText(isSelect);
+            }
         }
     }
 
@@ -600,7 +608,7 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         updateTabStyles();
     }
 
-    public void setTextBold(boolean textBold) {
+    public void setTextBold(int textBold) {
         this.mTextBold = textBold;
         updateTabStyles();
     }
@@ -736,7 +744,7 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         return mTextUnselectColor;
     }
 
-    public boolean isTextBold() {
+    public int getTextBold() {
         return mTextBold;
     }
 
@@ -764,6 +772,19 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         return mIconVisible;
     }
 
+
+    public ImageView getIconView(int tab) {
+        View tabView = mTabsContainer.getChildAt(tab);
+        ImageView iv_tab_icon = (ImageView) tabView.findViewById(R.id.iv_tab_icon);
+        return iv_tab_icon;
+    }
+
+    public TextView getTitleView(int tab) {
+        View tabView = mTabsContainer.getChildAt(tab);
+        TextView tv_tab_title = (TextView) tabView.findViewById(R.id.tv_tab_title);
+        return tv_tab_title;
+    }
+
     //setter and getter
 
     // show MsgTipView
@@ -782,7 +803,7 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         }
 
         View tabView = mTabsContainer.getChildAt(position);
-        RoundTextView tipView = (RoundTextView) tabView.findViewById(R.id.rtv_msg_tip);
+        MsgView tipView = (MsgView) tabView.findViewById(R.id.rtv_msg_tip);
         if (tipView != null) {
             UnreadMsgUtils.show(tipView, num);
 
@@ -819,7 +840,7 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         }
 
         View tabView = mTabsContainer.getChildAt(position);
-        RoundTextView tipView = (RoundTextView) tabView.findViewById(R.id.rtv_msg_tip);
+        MsgView tipView = (MsgView) tabView.findViewById(R.id.rtv_msg_tip);
         if (tipView != null) {
             tipView.setVisibility(View.GONE);
         }
@@ -835,7 +856,7 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
             position = mTabCount - 1;
         }
         View tabView = mTabsContainer.getChildAt(position);
-        RoundTextView tipView = (RoundTextView) tabView.findViewById(R.id.rtv_msg_tip);
+        MsgView tipView = (MsgView) tabView.findViewById(R.id.rtv_msg_tip);
         if (tipView != null) {
             TextView tv_tab_title = (TextView) tabView.findViewById(R.id.tv_tab_title);
             mTextPaint.setTextSize(mTextsize);
@@ -864,13 +885,13 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         }
     }
 
-    /** 当前类只提供了少许设置未读消息属性的方法,可以通过该方法获取RoundTextView对象从而各种设置 */
-    public RoundTextView getMsgView(int position) {
+    /** 当前类只提供了少许设置未读消息属性的方法,可以通过该方法获取MsgView对象从而各种设置 */
+    public MsgView getMsgView(int position) {
         if (position >= mTabCount) {
             position = mTabCount - 1;
         }
         View tabView = mTabsContainer.getChildAt(position);
-        RoundTextView tipView = (RoundTextView) tabView.findViewById(R.id.rtv_msg_tip);
+        MsgView tipView = (MsgView) tabView.findViewById(R.id.rtv_msg_tip);
         return tipView;
     }
 
@@ -879,6 +900,7 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
     public void setOnTabSelectListener(OnTabSelectListener listener) {
         this.mListener = listener;
     }
+
 
     @Override
     protected Parcelable onSaveInstanceState() {
@@ -900,7 +922,6 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         }
         super.onRestoreInstanceState(state);
     }
-
 
     class IndicatorPoint {
         public float left;

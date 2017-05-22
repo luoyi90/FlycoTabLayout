@@ -56,3 +56,32 @@ Version 1.4.6 *(2015-12-11)*
 Version 1.5.0 *(2015-12-11)*
 ----------------------------
 * change code style
+
+Version 2.0.0 *(2016.3.1)*
+----------------------------
+* remove the dependence of FlycoRoundView
+* new added method getIconView and getTitleView
+
+Version 2.0.2 *(2016.4.23)*
+----------------------------
+* remove the dependence of NineOldAnimation(only support 3.0+)
+
+Version 2.0.6 *(2016.5.21)*
+----------------------------
+* remove CustomTabProvider in SlidingTabLayout
+* new added method 'addNewTab(String title)' for SlidingTabLayout
+
+Version 2.0.8 *(2016.7.26)*
+---------------------------
+* Fix #27，#31(new added method 'setCurrentTab(int currentTab, boolean smoothScroll)' for SlidingTabLayout and redefine attr 'tl_textBold')
+
+Version 2.1.0 *(2016.10.28)*
+----------------------------
+* remove Application label in manifest
+* add method to make viewpager snap on tab click
+
+Version 2.1.2 *(2017.1.23)*
+----------------------------
+* update compileSdkVersion to 25, buildToolsVersion to "25.0.2"
+
+
